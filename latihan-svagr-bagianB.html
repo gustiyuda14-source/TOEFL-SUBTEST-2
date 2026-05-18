@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Paket 2 — Subject-Verb Agreement Evaluation</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --navy:        #0b1829;
+      --navy-mid:    #152238;
+      --navy-card:   #1c2f48;
+      --gold:        #c8a84b;
+      --gold-light:  #e8cc7a;
+      --gold-dim:    rgba(200,168,75,0.18);
+      --cream:       #f5f1ea;
+      --off-white:   #fafaf8;
+      --white:       #ffffff;
+      --text-dark:   #161c28;
+      --text-body:   #3a4558;
+      --text-muted:  #7a8698;
+      --border:      #e4e0d8;
+      --correct:     #1e7a50;
+      --correct-bg:  #e8f7ef;
+      --correct-bdr: #5dc994;
+      --wrong:       #b82c2c;
+      --wrong-bg:    #fdeaea;
+      --wrong-bdr:   #f08080;
+      --unanswered:  #eef0f3;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--navy);
+      color: var(--text-dark);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ═══ LOGIN ═══ */
+    #login-page {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--navy);
+      position: relative;
+      overflow: hidden;
+    }
+    .login-bg-dots {
+      position: absolute; inset: 0;
+      background-image: radial-gradient(circle, rgba(200,168,75,0.12) 1.5px, transparent 1.5px);
+      background-size: 36px 36px;
+      pointer-events: none;
+    }
+    .login-bg-glow {
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse 70% 70% at 50% 50%, rgba(200,168,75,0.07) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .deco-ring {
+      position: absolute;
+      border-radius: 50%;
+      border: 1px solid rgba(200,168,75,0.08);
+      pointer-events: none;
+      animation: spinSlow linear infinite;
+    }
+    .deco-ring:nth-child(1) { width: 500px; height: 500px; top: -160px; left: -160px; animation-duration: 60s; }
+    .deco-ring:nth-child(2) { width: 700px; height: 700px; bottom: -250px; right: -250px; animation-duration: 90s; animation-direction: reverse; border-color: rgba(200,168,75,0.05); }
+    .deco-ring:nth-child(3) { width: 240px; height: 240px; top: 25%; right: 8%; animation-duration: 45s; border-color: rgba(200,168,75,0.1); }
+    @keyframes spinSlow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+    .login-card {
+      position: relative; z-index: 10;
+      width: 100%; max-width: 480px;
+      background: rgba(255,255,255,0.035);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(200,168,75,0.18);
+      border-radius: 28px;
+      padding: 52px 52px;
+      text-align: center;
+      box-shadow: 0 40px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04) inset, 0 1px 0 rgba(255,255,255,0.08) inset;
+      animation: floatUp 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    @keyframes floatUp {
+      from { opacity: 0; transform: translateY(36px) scale(0.97); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .login-badge {
+      display: inline-flex; align-items: center; gap: 7px;
+      background: rgba(200,168,75,0.1);
+      border: 1px solid rgba(200,168,75,0.25);
+      border-radius: 100px;
+      padding: 5px 14px;
+      margin-bottom: 24px;
+      font-size: 10.5px; font-weight: 700; letter-spacing: 0.14em;
+      text-transform: uppercase; color: var(--gold-light);
+    }
+    .login-badge::before {
+      content: ''; width: 6px; height: 6px; border-radius: 50%;
+      background: var(--gold); box-shadow: 0 0 8px var(--gold); flex-shrink: 0;
+    }
+    .login-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 38px; font-weight: 900; color: var(--white);
+      line-height: 1.1; letter-spacing: -0.025em; margin-bottom: 8px;
+    }
+    .login-title .accent { color: var(--gold); }
+    .login-subtitle {
+      font-size: 13px; line-height: 1.65;
+      color: rgba(255,255,255,0.36); margin-bottom: 32px;
+    }
+    .quiz-meta-row {
+      display: flex; justify-content: center; gap: 0;
+      margin-bottom: 28px;
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 14px; overflow: hidden;
+    }
+    .meta-cell {
+      flex: 1; padding: 13px 0;
+      border-right: 1px solid rgba(255,255,255,0.07); text-align: center;
+    }
+    .meta-cell:last-child { border-right: none; }
+    .meta-val {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px; font-weight: 700; color: var(--gold);
+      display: block; line-height: 1; margin-bottom: 4px;
+    }
+    .meta-lbl { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.25); }
+    .input-separator {
+      height: 1px;
+      background: linear-gradient(to right, transparent, rgba(200,168,75,0.18), transparent);
+      margin-bottom: 26px;
+    }
+    .field-label {
+      display: block; font-size: 10.5px; font-weight: 700;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: rgba(255,255,255,0.38); text-align: left; margin-bottom: 10px;
+    }
+    .name-input {
+      width: 100%;
+      background: rgba(255,255,255,0.055);
+      border: 1.5px solid rgba(255,255,255,0.1);
+      border-radius: 13px; padding: 15px 18px;
+      font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500;
+      color: var(--white); outline: none;
+      transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+      margin-bottom: 16px;
+    }
+    .name-input::placeholder { color: rgba(255,255,255,0.18); }
+    .name-input:focus {
+      border-color: rgba(200,168,75,0.5);
+      background: rgba(200,168,75,0.06);
+      box-shadow: 0 0 0 4px rgba(200,168,75,0.08);
+    }
+    .start-btn {
+      width: 100%; padding: 16px;
+      background: linear-gradient(135deg, #c8a84b 0%, #e8cc7a 60%, #c8a84b 100%);
+      background-size: 200% 100%; color: var(--navy); border: none;
+      border-radius: 13px; font-family: 'DM Sans', sans-serif;
+      font-size: 13.5px; font-weight: 800; letter-spacing: 0.07em;
+      text-transform: uppercase; cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s, background-position 0.4s;
+      box-shadow: 0 4px 28px rgba(200,168,75,0.28);
+    }
+    .start-btn:hover {
+      transform: translateY(-3px); box-shadow: 0 8px 36px rgba(200,168,75,0.42);
+      background-position: right center;
+    }
+    .start-btn:active { transform: translateY(-1px); }
+    .login-foot { margin-top: 24px; font-size: 11.5px; color: rgba(255,255,255,0.17); letter-spacing: 0.03em; }
+
+    /* ═══ QUIZ PAGE ═══ */
+    #quiz-page { display: none; min-height: 100vh; background: var(--cream); }
+    .quiz-header {
+      background: var(--navy); height: 62px; padding: 0 28px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 200;
+      box-shadow: 0 2px 24px rgba(0,0,0,0.35);
+    }
+    .hdr-brand { font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 700; color: var(--white); letter-spacing: -0.01em; }
+    .hdr-brand .g { color: var(--gold); }
+    .hdr-center { display: flex; align-items: center; gap: 10px; }
+    .hdr-prog-text { font-size: 11.5px; color: rgba(255,255,255,0.4); font-weight: 600; letter-spacing: 0.05em; }
+    .hdr-track { width: 110px; height: 3px; background: rgba(255,255,255,0.1); border-radius: 100px; overflow: hidden; }
+    .hdr-fill {
+      height: 100%; background: linear-gradient(90deg, var(--gold), var(--gold-light));
+      border-radius: 100px; transition: width 0.45s cubic-bezier(0.4,0,0.2,1); width: 0%;
+    }
+    .hdr-student { display: flex; align-items: center; gap: 9px; }
+    .hdr-avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 13px; color: var(--navy);
+      box-shadow: 0 0 0 2px rgba(200,168,75,0.3);
+    }
+    .hdr-sname { font-size: 13px; color: rgba(255,255,255,0.6); font-weight: 500; max-width: 140px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    .quiz-body { max-width: 1160px; margin: 0 auto; padding: 32px 24px; display: flex; gap: 26px; min-height: calc(100vh - 62px); }
+
+    /* ── NAV PANE ── */
+    .nav-pane { width: 220px; flex-shrink: 0; }
+    .nav-inner {
+      background: var(--white); border-radius: 20px; padding: 22px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.055);
+      position: sticky; top: 90px; border: 1px solid var(--border);
+    }
+    .nav-pane-hd {
+      font-size: 9.5px; font-weight: 800; letter-spacing: 0.14em;
+      text-transform: uppercase; color: var(--text-muted);
+      margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid var(--border);
+    }
+    .nav-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 18px; }
+    .nbtn {
+      width: 100%; aspect-ratio: 1; border: 2px solid transparent;
+      border-radius: 9px; background: var(--unanswered);
+      font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 700;
+      cursor: pointer; color: var(--text-muted);
+      transition: all 0.18s ease;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .nbtn:hover { transform: scale(1.1); }
+    .nbtn.active { background: var(--navy); border-color: var(--navy); color: var(--white); box-shadow: 0 4px 14px rgba(11,24,41,0.3); }
+    .nbtn.n-correct { background: var(--correct-bg); border-color: var(--correct-bdr); color: var(--correct); }
+    .nbtn.n-wrong   { background: var(--wrong-bg);   border-color: var(--wrong-bdr);   color: var(--wrong); }
+    .nav-legend { display: flex; flex-direction: column; gap: 7px; }
+    .leg-item { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--text-muted); }
+    .leg-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+    .ld-un     { background: var(--unanswered); border: 1.5px solid #ced4da; }
+    .ld-active { background: var(--navy);        border: 1.5px solid var(--navy); }
+    .ld-ok     { background: var(--correct-bg);  border: 1.5px solid var(--correct-bdr); }
+    .ld-bad    { background: var(--wrong-bg);    border: 1.5px solid var(--wrong-bdr); }
+
+    /* ── QUESTION CARD ── */
+    .q-area { flex: 1; min-width: 0; }
+    .q-card {
+      background: var(--white); border-radius: 24px; padding: 40px 50px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.055); border: 1px solid var(--border);
+      animation: slideCard 0.32s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    @keyframes slideCard {
+      from { opacity: 0; transform: translateX(18px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    .q-tag {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--navy); border-radius: 100px;
+      padding: 5px 14px 5px 6px; margin-bottom: 22px;
+    }
+    .q-tag-num {
+      width: 25px; height: 25px; border-radius: 50%;
+      background: var(--gold); color: var(--navy);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 900;
+    }
+    .q-tag-lbl { font-size: 11px; font-weight: 700; letter-spacing: 0.06em; color: rgba(255,255,255,0.6); }
+    .q-tag-lbl .hi { color: var(--gold-light); }
+    .q-text {
+      font-family: 'DM Serif Display', serif;
+      font-size: 20px; line-height: 1.65; color: var(--text-dark); margin-bottom: 30px;
+    }
+    .q-blank {
+      display: inline-block; width: 72px; height: 2.5px;
+      background: var(--navy); vertical-align: middle;
+      margin: 0 5px; border-radius: 2px;
+    }
+    .options-list { display: flex; flex-direction: column; gap: 9px; margin-bottom: 26px; }
+    .opt-btn {
+      width: 100%; padding: 14px 19px;
+      border: 2px solid var(--border); border-radius: 13px;
+      background: var(--off-white); font-family: 'DM Sans', sans-serif;
+      font-size: 14.5px; font-weight: 500; color: var(--text-body);
+      cursor: pointer; text-align: left; display: flex; align-items: center;
+      gap: 12px; transition: all 0.18s ease;
+    }
+    .opt-btn:hover:not(:disabled) {
+      border-color: var(--navy); background: var(--white);
+      transform: translateX(5px); box-shadow: 0 4px 18px rgba(11,24,41,0.08);
+    }
+    .opt-btn:hover:not(:disabled) .opt-letter { background: var(--navy); color: var(--white); }
+    .opt-letter {
+      width: 28px; height: 28px; border-radius: 7px;
+      background: var(--border); color: var(--text-muted);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 800; flex-shrink: 0; transition: all 0.18s;
+    }
+    .opt-btn.opt-correct       { border-color: var(--correct-bdr); background: var(--correct-bg); color: var(--correct); cursor: default; transform: none !important; }
+    .opt-btn.opt-correct       .opt-letter { background: var(--correct); color: var(--white); }
+    .opt-btn.opt-wrong         { border-color: var(--wrong-bdr);   background: var(--wrong-bg);   color: var(--wrong);   cursor: default; transform: none !important; }
+    .opt-btn.opt-wrong         .opt-letter { background: var(--wrong);   color: var(--white); }
+    .opt-btn.opt-show-correct  { border-color: var(--correct-bdr); background: rgba(30,122,80,0.05); color: var(--correct); cursor: default; transform: none !important; }
+    .opt-btn.opt-show-correct  .opt-letter { background: var(--correct); color: var(--white); }
+    .opt-btn:disabled { cursor: default; transform: none !important; }
+    .opt-icon { margin-left: auto; font-size: 16px; }
+
+    /* ── PEMBAHASAN ── */
+    .pembahasan {
+      background: linear-gradient(135deg, #eff4fb 0%, #e8f0fd 100%);
+      border: 1.5px solid rgba(11,24,41,0.1); border-left: 4px solid var(--navy);
+      border-radius: 18px; padding: 24px 28px; margin-top: 18px;
+      animation: expandSlide 0.38s cubic-bezier(0.16,1,0.3,1) both;
+    }
+    @keyframes expandSlide {
+      from { opacity: 0; transform: translateY(-12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .pemb-head { display: flex; align-items: center; gap: 10px; margin-bottom: 13px; }
+    .pemb-icon-box {
+      width: 30px; height: 30px; border-radius: 8px; background: var(--navy);
+      display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0;
+    }
+    .pemb-title { font-size: 10.5px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--navy); }
+    .pemb-body { font-size: 13.5px; line-height: 1.85; color: #2c3a4e; }
+    .pemb-body strong { color: var(--navy); font-weight: 700; }
+    .pemb-body em { font-style: italic; color: #3a4d62; }
+    .ans-pill {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: var(--correct-bg); border: 1px solid var(--correct-bdr);
+      color: var(--correct); padding: 3px 11px; border-radius: 100px;
+      font-size: 12.5px; font-weight: 700; margin-bottom: 5px;
+    }
+
+    /* ── CARD FOOTER ── */
+    .card-foot {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-top: 28px; padding-top: 20px; border-top: 1.5px solid var(--border);
+    }
+    .foot-btn {
+      padding: 12px 26px; border-radius: 12px; border: none;
+      font-family: 'DM Sans', sans-serif; font-size: 13.5px; font-weight: 700;
+      cursor: pointer; transition: all 0.18s;
+    }
+    .btn-prev { background: var(--unanswered); color: var(--text-muted); }
+    .btn-prev:hover { background: #dde0e5; color: var(--text-dark); }
+    .btn-next { background: var(--navy); color: var(--white); box-shadow: 0 4px 16px rgba(11,24,41,0.2); }
+    .btn-next:hover { background: var(--navy-card); transform: translateX(3px); box-shadow: 0 6px 22px rgba(11,24,41,0.3); }
+    .btn-finish { background: linear-gradient(135deg, var(--gold), var(--gold-light)); color: var(--navy); box-shadow: 0 4px 18px rgba(200,168,75,0.28); }
+    .btn-finish:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(200,168,75,0.42); }
+
+    /* ═══ RESULT PAGE ═══ */
+    #result-page { display: none; min-height: 100vh; background: var(--navy); position: relative; overflow: hidden; }
+    #result-page::before {
+      content: ''; position: absolute; inset: 0;
+      background-image: radial-gradient(circle, rgba(200,168,75,0.1) 1.5px, transparent 1.5px);
+      background-size: 36px 36px; pointer-events: none;
+    }
+    #result-page::after {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 60% at 50% 40%, rgba(200,168,75,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .result-wrap {
+      position: relative; z-index: 10;
+      max-width: 720px; margin: 0 auto; padding: 68px 24px 80px; text-align: center;
+    }
+    .result-trophy { font-size: 68px; display: block; margin-bottom: 18px; animation: popIn 0.65s cubic-bezier(0.68, -0.55, 0.265, 1.55) both 0.1s; }
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.4) rotate(-10deg); }
+      to   { opacity: 1; transform: scale(1) rotate(0deg); }
+    }
+    .result-h1 { font-family: 'Playfair Display', serif; font-size: 42px; font-weight: 900; color: var(--white); letter-spacing: -0.025em; margin-bottom: 7px; animation: fadeUp2 0.5s ease both 0.3s; }
+    .result-sub { font-size: 14px; color: rgba(255,255,255,0.35); margin-bottom: 40px; animation: fadeUp2 0.5s ease both 0.4s; }
+    @keyframes fadeUp2 { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+
+    .score-box {
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(200,168,75,0.18);
+      border-radius: 24px; padding: 40px; margin-bottom: 28px;
+      animation: fadeUp2 0.5s ease both 0.5s;
+    }
+    .score-ring {
+      width: 150px; height: 150px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 60%);
+      margin: 0 auto 26px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      box-shadow: 0 0 60px rgba(200,168,75,0.28), 0 0 0 6px rgba(200,168,75,0.1);
+    }
+    .score-n { font-family: 'Playfair Display', serif; font-size: 50px; font-weight: 900; color: var(--navy); line-height: 1; }
+    .score-d { font-size: 13px; font-weight: 700; color: rgba(11,24,41,0.5); }
+    .score-stats { display: flex; justify-content: center; gap: 52px; }
+    .sstat { text-align: center; }
+    .sstat-n { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; display: block; margin-bottom: 4px; }
+    .sc { color: #6bcb94; } .sw { color: #ff8fa3; }
+    .sstat-l { font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.28); }
+
+    .result-grade { font-family: 'Playfair Display', serif; font-size: 18px; font-style: italic; color: var(--gold-light); margin-bottom: 32px; animation: fadeUp2 0.5s ease both 0.6s; }
+
+    .review-list { text-align: left; display: flex; flex-direction: column; gap: 9px; margin-bottom: 36px; animation: fadeUp2 0.5s ease both 0.7s; }
+    .rev-item { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 13px; padding: 12px 16px; display: flex; align-items: flex-start; gap: 12px; }
+    .rev-ico { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; margin-top: 1px; }
+    .ri-c { background: rgba(107,203,148,0.15); color: #6bcb94; }
+    .ri-w { background: rgba(255,143,163,0.15); color: #ff8fa3; }
+    .rev-body { flex: 1; min-width: 0; }
+    .rev-qtxt { font-size: 12.5px; color: rgba(255,255,255,0.55); line-height: 1.5; margin-bottom: 4px; font-weight: 600; }
+    .rev-ans { font-size: 11.5px; display: flex; flex-wrap: wrap; gap: 6px; }
+    .ra-yours { color: rgba(255,143,163,0.85); }
+    .ra-correct { color: rgba(107,203,148,0.9); font-weight: 600; }
+
+    .restart-btn {
+      padding: 15px 48px; background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
+      color: var(--navy); border: none; border-radius: 14px;
+      font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 800;
+      letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer;
+      transition: all 0.22s; box-shadow: 0 4px 24px rgba(200,168,75,0.28);
+      animation: fadeUp2 0.5s ease both 0.8s;
+    }
+    .restart-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 36px rgba(200,168,75,0.44); }
+
+    /* ═══ RESPONSIVE ═══ */
+    @media (max-width: 720px) {
+      .login-card { padding: 36px 24px; }
+      .login-title { font-size: 30px; }
+      .quiz-body { flex-direction: column; padding: 16px; gap: 16px; }
+      .nav-pane { width: 100%; }
+      .nav-inner { position: static; }
+      .q-card { padding: 26px 20px; }
+      .quiz-header { padding: 0 16px; }
+      .hdr-sname { max-width: 90px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ════════ LOGIN PAGE ════════ -->
+<div id="login-page">
+  <div class="login-bg-dots"></div>
+  <div class="login-bg-glow"></div>
+  <div class="deco-ring"></div>
+  <div class="deco-ring"></div>
+  <div class="deco-ring"></div>
+
+  <div class="login-card">
+    <div class="login-badge">Paket 2 &middot; Bagian B &middot; Evaluation</div>
+    <h1 class="login-title">Subject-Verb<br><span class="accent">Agreement</span></h1>
+    <p class="login-subtitle">
+      Evaluasi pemahamanmu tentang kesesuaian subjek<br>
+      dan kata kerja — 20 soal pilihan ganda.
+    </p>
+
+    <div class="quiz-meta-row">
+      <div class="meta-cell">
+        <span class="meta-val">20</span>
+        <span class="meta-lbl">Soal</span>
+      </div>
+      <div class="meta-cell">
+        <span class="meta-val">2</span>
+        <span class="meta-lbl">Paket</span>
+      </div>
+      <div class="meta-cell">
+        <span class="meta-val">MCQ</span>
+        <span class="meta-lbl">Format</span>
+      </div>
+    </div>
+
+    <div class="input-separator"></div>
+    <label class="field-label" for="sname">Nama Lengkap Murid</label>
+    <input type="text" id="sname" class="name-input" placeholder="Masukkan nama kamu di sini…" autocomplete="off" spellcheck="false">
+    <button class="start-btn" onclick="startQuiz()">Mulai Evaluasi &rarr;</button>
+    <p class="login-foot">Paket 2 &middot; Bagian B &middot; Evaluation &middot; Choose the correct answer</p>
+  </div>
+</div>
+
+<!-- ════════ QUIZ PAGE ════════ -->
+<div id="quiz-page">
+  <header class="quiz-header">
+    <div class="hdr-brand">English<span class="g">Quiz</span></div>
+    <div class="hdr-center">
+      <span class="hdr-prog-text" id="hdr-prog">0 / 20</span>
+      <div class="hdr-track"><div class="hdr-fill" id="hdr-fill"></div></div>
+    </div>
+    <div class="hdr-student">
+      <div class="hdr-avatar" id="hdr-avatar">?</div>
+      <span class="hdr-sname" id="hdr-sname"></span>
+    </div>
+  </header>
+
+  <div class="quiz-body">
+    <aside class="nav-pane">
+      <div class="nav-inner">
+        <div class="nav-pane-hd">Navigasi Soal</div>
+        <div class="nav-grid" id="nav-grid"></div>
+        <div class="nav-legend">
+          <div class="leg-item"><div class="leg-dot ld-un"></div> Belum dijawab</div>
+          <div class="leg-item"><div class="leg-dot ld-active"></div> Soal aktif</div>
+          <div class="leg-item"><div class="leg-dot ld-ok"></div> Benar</div>
+          <div class="leg-item"><div class="leg-dot ld-bad"></div> Salah</div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="q-area">
+      <div class="q-card" id="q-card"></div>
+    </main>
+  </div>
+</div>
+
+<!-- ════════ RESULT PAGE ════════ -->
+<div id="result-page">
+  <div class="result-wrap">
+    <span class="result-trophy" id="r-trophy">&#127942;</span>
+    <h1 class="result-h1" id="r-title">Evaluasi Selesai!</h1>
+    <p class="result-sub" id="r-sub"></p>
+    <div class="score-box">
+      <div class="score-ring">
+        <span class="score-n" id="r-score">0</span>
+        <span class="score-d">dari 20</span>
+      </div>
+      <div class="score-stats">
+        <div class="sstat"><span class="sstat-n sc" id="r-correct">0</span><span class="sstat-l">Benar</span></div>
+        <div class="sstat"><span class="sstat-n sw" id="r-wrong">0</span><span class="sstat-l">Salah</span></div>
+      </div>
+    </div>
+    <p class="result-grade" id="r-grade"></p>
+    <div class="review-list" id="r-review"></div>
+    <button class="restart-btn" onclick="restartQuiz()">&#8635; Ulangi Evaluasi</button>
+  </div>
+</div>
+
+<script>
+/* ─── QUIZ DATA ─── */
+const QUESTIONS = [
+  {
+    id: 1,
+    raw: "Annie and her brothers ___ at school every Monday.",
+    opts: ["Is", "Are", "Was", "Were", "Had"],
+    answer: "Are",
+    pemb: `
+      <div style="margin-bottom:12px"><span class="ans-pill">&#10003; Jawaban Benar: <strong>Are</strong></span></div>
+      <p><strong>Konsep: Compound Subject dengan "And" → selalu Plural</strong></p><br>
+      <p>Ketika dua atau lebih subjek dihubungkan dengan konjungsi <strong>"and"</strong>, subjek tersebut menjadi <em>compound subject</em> (majemuk) yang bersifat <strong>plural</strong>.</p><br>
+      <p><strong>"Annie and her brothers"</strong> = dua pihak yang berbeda → plural. Keterangan waktu <strong>"every Monday"</strong> menunjukkan kebiasaan → <strong>Simple Present Tense</strong>. Untuk subjek plural dalam Simple Present, tidak ada akhiran -s/-es pada kata kerja.</p><br>
+      <p>→ Singular: <em>is / was</em> &nbsp;|&nbsp; Plural: <em><strong>are</strong> / were</em></p><br>
+      <p>&#10003; <em>Annie and her brothers <strong>are</strong> at school every Monday.</em></p>
+    `
+  },
+  {
+    id: 2,
+    raw: "Either my father or my mother ___ to the meeting.",
+    opts: ["Is coming", "Are coming", "Was coming", "Were coming", "Had homing"],
+    answer: "Is coming",
+    pemb: `
+      <div style="margin-bottom:12px"><span class="ans-pill">&#10003; Jawaban Benar: <strong>Is coming</strong></span></div>
+      <p><strong>Konsep: Either...Or Rule — Proximity Agreement</strong></p><br>
+      <p>Dengan konjungsi <strong>"Either...or"</strong>, kata kerja disesuaikan dengan subjek yang letaknya <strong>paling dekat</strong> (Proximity Rule).</p><br>
+      <p>Subjek yang paling dekat dengan kata kerja adalah <strong>"my mother"</strong> (singular). Konteks kalimat menunjukkan aktivitas yang sedang akan berlangsung → <strong>Present Continuous Tense</strong> (is/are + V-ing).</p><br>
+      <p>Singular → <strong>"Is coming"</strong>. Opsi "Had homing" bukan frasa yang valid.</p><br>
+      <p>&#10003; <em>Either my father or my mother <strong>is coming</strong> to the meeting.</em></p>
+    `
+  },
+  {
+    id: 3,
+    raw: "The dog or cats ___ outside of this house.",
+    opts: ["Is", "Are", "Was", "Were", "Had"],
+    answer: "Are",
+    pemb: `
+      <div style="margin-bottom:12px"><span class="ans-pill">&#10003; Jawaban Benar: <strong>Are</strong></span></div>
+      <p><strong>Konsep: "Or" Rule — Nearest Subject Plural</strong></p><br>
+      <p>Ketika dua subjek dihubungkan oleh <strong>"or"</strong>, kata kerja disesuaikan dengan subjek yang <strong>paling dekat</strong> dengan kata kerja (Proximity Rule).</p><br>
+      <p>Subjek: <em>"The dog"</em> (singular) <strong>or</strong> <em>"cats"</em> (plural). Subjek yang paling dekat adalah <strong>"cats"</strong> (plural). Simple Present untuk plural → <strong>"Are"</strong>.</p><br>
+      <p>Rumus: A or B → verba sesuai B. &nbsp; B = "cats" (plural) → <strong>Are</strong>.</p><br>
+      <p>&#10003; <em>The dog or cats <strong>are</strong> outside of this house.</em></p>
+    `
+  },
+  {
+    id: 4,
+    raw: "One of my sisters ___ on a trip to Jakarta.",
+    opts: ["Is going", "Are going", "Was going", "Were going", "Had going"],
+    answer: "Is going",
+    pemb: `
+      <div style="margin-bottom:12px"><span class="ans-pill">&#10003; Jawaban Benar: <strong>Is going</strong></span></div>
+      <p><strong>Konsep: "One of" selalu Singular</strong></p><br>
+      <p>Pola <strong>"One of + noun plural"</strong>: subjek utama kalimat adalah kata <strong>"one"</strong> (singular), bukan kata benda plural yang mengikutinya ("sisters").</p><br>
+      <p>Meskipun "sisters" berbentuk jamak, penentu keselarasan verba adalah <strong>"one"</strong> (singular). Present Continuous untuk aktivitas yang sedang berlangsung → <em>is/are + V-ing</em>. Singular → <strong>"Is going"</strong>. Opsi "Had going" tidak gramatikal.</p><br>
+      <p>&#10003; <em>One of my sisters <strong>is going</strong> on a trip to Jakarta.</em></p>
+    `
+  },
+  {
+    id: 5,
+    raw: "The man with all the birds ___ on my street.",
+    opts: ["Living", "Lived", "Lives", "Live", "Left"],
+    answer: "Lives",
+    pemb: `
+      <div style="margin-bottom:12px"><span class="ans-pill">&#10003; Jawaban Benar: <strong>Lives</strong></span></div>
+      <p><strong>Konsep: Prepositional Phrase tidak Mengubah Subjek</strong></p><br>
+      <p>Subjek sebenarnya dalam kalimat ini adalah <strong>"The man"</strong> (singular). Frasa <strong>"with all the birds"</strong> adalah frasa preposisional yang hanya menerangkan "the man" — bukan bagian dari subjek.</p><br>
+      <p>Kalimat ini mendeskripsikan fakta umum (seseorang tinggal di jalan itu) → <strong>Simple Present Tense</strong>. Untuk subjek orang ketiga singular: kata kerja + s/es → <strong>"Lives"</strong>. Opsi "Living" butuh auxiliary verb (is living).</p><br>
+      <p>&#10003; <em>The man with all the birds <strong>lives</strong> on my street.</em></p>
+    `
+  },
+  {
+    id: 6,
+    raw: "The movie, including all the previews, ___ about two hours to watch.",
+    opts: ["Taking", "Took", "Takes", "Take", "Tooken"],
+    answer: "Takes",
+    pemb: `
+      <div style="margin-bottom:12px"><span class="ans-pill">&#10003; Jawaban Benar: <strong>Takes</strong></span></div>
+      <p><strong>Konsep: Interrupting Phrase tidak Mengubah Subjek</strong></p><br>
+      <p>Subjek utama adalah <strong>"The movie"</strong> (singular). Frasa <strong>"including all the previews"</strong> adalah <em>appositive phrase</em> yang diapit koma — ini hanya keterangan tambahan, tidak mengubah subjek.</p><br>
+      <p>Kalimat menyatakan fakta umum tentang durasi → <strong>Simple Present Tense</strong>. Singular + Simple Present → kata kerja + s/es → <strong>"Takes"</strong>. Catatan: <em>"Tooken"</em> bukan kata yang ada dalam bahasa Inggris (bentuk past participle yang benar adalah "taken").</p><br>
+      <p>&#10003; <em>The movie, including all the previews, <strong>takes</strong> about two hours to watch.</em></p>
+    `
+  },
+  {
+    id: 7,
+    raw: "The players, as well as the captain, ___ to win the game.",
+    opts: ["Want", "Wants", "Wanted", "Wanting", "Has wanted"],
+    answer: "Want",
+    pemb: `
+      <div style="margin-bottom:12px"><span class="ans-pill">&#10003; Jawaban Benar: <strong>Want</strong></span></div>
+      <p><strong>Konsep: "As well as" ≠ "And" — Subjek Utama tetap Plural</strong></p><br>
+      <p>Konjungsi <strong>"as well as"</strong> berbeda dengan <strong>"and"</strong>. "As well as" <em>tidak</em> membentuk compound subject, melainkan berfungsi sebagai frasa parentetis (diapit koma).</p><br>
+      <p>Subjek utama kalimat ini tetap <strong>"The players"</strong> (plural). Frasa "as well as the captain" hanya tambahan informasi. Plural + Simple Present → tanpa akhiran -s/es → <strong>"Want"</strong>.</p><br>
+      <p>Bandingkan: <em>"The players <strong>and</strong> the captain want..."</em> (sama-sama plural, sama hasilnya, tapi karena "and"). Namun jika subjek utamanya singular + "as well as" + plural → tetap singular.</p><br>
+      <p>&#10003; <em>The players, as well as the captain, <strong>want</strong> to win the game.</em></p>
+    `
+  },
+  {
+    id: 8,
+    raw: "Some of the school's subjects ___ this semester.",
+    opts: ["Was taught", "Were taught", "Is taught", "Are taught", "Taught"],
+    answer: "Are taught",
+    pemb: `
+      <div style="margin-bottom:12px"><span class="ans-pill">&#10003; Jawaban Benar: <strong>Are taught</strong></span></div>
+      <p><strong>Konsep: "Some of" + Plural Noun → Plural; Passive Voice Present</strong></p><br>
+      <p><strong>"Some of"</strong> + kata benda countable plural → subjek plural. Di sini, "subjects" (jamak) → verba harus plural.</p><br>
+      <p>Keterangan <strong>"this semester"</strong> menunjukkan waktu yang sedang berjalan (sekarang) → <strong>Present Tense</strong>. Kalimat ini bersifat <em>pasif</em> (mata pelajaran "diajarkan", bukan mengajar).</p><br>
+      <p>Rumus Passive Present (plural): <em><strong>are</strong> + past participle</em> → <strong>"Are taught"</strong>. "Were taught" = past; "Was/Is taught" = singular.</p><br>
+      <p>&#10003; <em>Some of the school's subjects <strong>are taught</strong> this semester.</em></p>
+    `
+  },
+  {
+    id: 9,
+    raw: "There ___ fifteen candies in that bag. Now, there ___ only one left!",
+    opts: ["Were / is", "Was / are", "Are / Was", "Is / Were", "Are / Is"],
+    answer: "Were / is",
+    pemb: `
+      <div style="margin-bottom:12px"><span class="ans-pill">&#10003; Jawaban Benar: <strong>Were / is</strong></span></div>
+      <p><strong>Konsep: Dual Agreement — Past Plural &amp; Present Singular</strong></p><br>
+      <p><strong>Kalimat 1:</strong> "There ___ fifteen candies in that bag." <br>
+      Subjek: <strong>"fifteen candies"</strong> (plural). Konteks masa lalu (diceritakan sebagai keadaan lampau) → Past Tense. Plural Past → <strong>"Were"</strong>.</p><br>
+      <p><strong>Kalimat 2:</strong> "Now, there ___ only one left!" <br>
+      Subjek: <strong>"only one"</strong> (singular). Kata <strong>"Now"</strong> = waktu sekarang → Present Tense. Singular Present → <strong>"is"</strong>.</p><br>
+      <p>Gabungan: <strong>Were / is</strong></p><br>
+      <p>&#10003; <em>There <strong>were</strong> fifteen candies in that bag. Now, there <strong>is</strong> only one left!</em></p>
+    `
+  },
+  {
+    id: 10,
+    raw: "The committee ___ these questions carefully.",
+    opts: ["Debates", "Debate", "Debated", "Debating", "Are debating"],
+    answer: "Debates",
+    pemb: `
+      <div style="margin-bottom:12px"><span class="ans-pill">&#10003; Jawaban Benar: <strong>Debates</strong></span></div>
+      <p><strong>Konsep: Collective Noun → Singular (American English)</strong></p><br>
+      <p><strong>"The committee"</strong> adalah <em>collective noun</em> (kata benda kolektif). Dalam bahasa Inggris (terutama American English), collective noun umumnya diperlakukan sebagai <strong>singular</strong> ketika bertindak sebagai satu kesatuan.</p><br>
+      <p>Kalimat ini menyatakan kebiasaan/fakta → <strong>Simple Present Tense</strong>. Singular + Simple Present → kata kerja + s/es → <strong>"Debates"</strong>.</p><br>
+      <p>Catatan: "Debating" butuh auxiliary (is debating); "Debate" = plural/bare infinitive; "Debated" = past tense; "Are debating" = plural present continuous.</p><br>
+      <p>&#10003; <em>The committee <strong>debates</strong> these questions carefully.</em></p>
+    `
+  },
+  {
+    id: 11,
+    raw: "All of the CD's, even the scratched one, ___ in this case.",
+    opts: ["Was", "Were", "Had", "Is", "Are"],
+    answer: "Are",
+    pemb: `
+      <div style="margin-bottom:12px"><span class="ans-pill">&#10003; Jawaban Benar: <strong>Are</strong></span></div>
+      <p><strong>Konsep: "All of" + Countable Plural Noun → Plural</strong></p><br>
+      <p><strong>"All of the CDs"</strong>: kata "all" dengan kata benda <em>countable plural</em> ("CDs") → subjek plural. Frasa <strong>"even the scratched one"</strong> adalah appositive parenthetical yang diapit koma — tidak mengubah subjek.</p><br>
+      <p>Kalimat menggambarkan keadaan saat ini → <strong>Simple Present Tense</strong>. Plural Present → <strong>"Are"</strong>.</p><br>
+      <p>"Was/Is" = singular; "Were" = plural past (tidak sesuai konteks present); "Had" = auxiliary past.</p><br>
+      <p>&#10003; <em>All of the CD's, even the scratched one, <strong>are</strong> in this case.</em></p>
+    `
+  },
+  {
+    id: 12,
+    raw: "Neither the men nor the children ___ to the party.",
+    opts: ["Comes", "Coming", "Was coming", "Is coming", "Come"],
+    answer: "Come",
+    pemb: `
+      <div style="margin-bottom:12px"><span class="ans-pill">&#10003; Jawaban Benar: <strong>Come</strong></span></div>
+      <p><strong>Konsep: Neither...Nor Rule — Nearest Subject Plural</strong></p><br>
+      <p>Konjungsi <strong>"Neither...nor"</strong> (atau "neither...or") mengikuti <em>Proximity Rule</em>: kata kerja disesuaikan dengan subjek yang paling dekat.</p><br>
+      <p>Subjek: <em>"the men"</em> (plural) <strong>nor</strong> <em>"the children"</em> (plural). Subjek terdekat dengan verba adalah <strong>"the children"</strong> (plural). Simple Present untuk plural → tanpa akhiran -s/es → <strong>"Come"</strong>.</p><br>
+      <p>"Comes" = singular; "Coming" butuh auxiliary; "Was/Is coming" = singular past/present continuous.</p><br>
+      <p>&#10003; <em>Neither the men nor the children <strong>come</strong> to the party.</em></p>
+    `
+  },
+  {
+    id: 13,
+    raw: "Several of the sheep ___ sick.",
+    opts: ["Is", "Are", "Will", "Can", "Should"],
+    answer: "Are",
+    pemb: `
+      <div style="margin-bottom:12px"><span class="ans-pill">&#10003; Jawaban Benar: <strong>Are</strong></span></div>
+      <p><strong>Konsep: "Several" selalu merujuk Plural</strong></p><br>
+      <p>Kata <strong>"several"</strong> berarti "beberapa" dan selalu digunakan untuk merujuk jumlah yang lebih dari satu → subjek <strong>plural</strong>.</p><br>
+      <p>Catatan penting: <strong>"sheep"</strong> adalah kata benda <em>irregular</em> yang bentuk singular dan pluralnya sama (sheep = sheep). Namun, kata "several" memastikan bahwa konteksnya adalah plural.</p><br>
+      <p>"Several of the sheep" → plural → Simple Present → <strong>"Are"</strong>. Opsi "Will/Can/Should" adalah modal verbs yang tidak tepat untuk pernyataan fakta sederhana ini.</p><br>
+      <p>&#10003; <em>Several of the sheep <strong>are</strong> sick.</em></p>
+    `
+  },
+  {
+    id: 14,
+    raw: "Some members of the faculty ___ present.",
+    opts: ["Is", "Are", "Has", "Have", "Had"],
+    answer: "Are",
+    pemb: `
+      <div style="margin-bottom:12px"><span class="ans-pill">&#10003; Jawaban Benar: <strong>Are</strong></span></div>
+      <p><strong>Konsep: "Some members" → Plural Subject</strong></p><br>
+      <p><strong>"Some members"</strong> jelas merupakan subjek plural (members = jamak). Frasa <strong>"of the faculty"</strong> adalah frasa preposisional yang hanya menerangkan "members" — tidak mengubah keselarasan verba.</p><br>
+      <p>Kalimat menggambarkan keadaan saat ini → <strong>Simple Present Tense</strong>. Plural → <strong>"Are"</strong>.</p><br>
+      <p>"Is" = singular; "Has/Have" = auxiliary verb (tidak sesuai konteks); "Had" = past auxiliary.</p><br>
+      <p>&#10003; <em>Some members of the faculty <strong>are</strong> present.</em></p>
+    `
+  },
+  {
+    id: 15,
+    raw: "Each of the girls ___ all the regulations.",
+    opts: ["Observed", "Was observed", "Observe", "Were observed", "Observes"],
+    answer: "Observes",
+    pemb: `
+      <div style="margin-bottom:12px"><span class="ans-pill">&#10003; Jawaban Benar: <strong>Observes</strong></span></div>
+      <p><strong>Konsep: "Each of" selalu Singular</strong></p><br>
+      <p>Pola <strong>"Each of + noun plural"</strong>: subjek utama adalah kata <strong>"each"</strong> (distributive pronoun, singular), bukan kata benda plural yang mengikutinya ("girls").</p><br>
+      <p>"Each" selalu diperlakukan sebagai singular, karena merujuk pada setiap individu secara terpisah. Simple Present → singular → kata kerja + s/es → <strong>"Observes"</strong>.</p><br>
+      <p>"Observed" = Simple Past; "Was/Were observed" = Passive Voice past; "Observe" = plural/bare infinitive.</p><br>
+      <p>&#10003; <em>Each of the girls <strong>observes</strong> all the regulations.</em></p>
+    `
+  },
+  {
+    id: 16,
+    raw: "There ___ a dog, a cat, and a bird in the cage.",
+    opts: ["Is", "Are", "Has", "Have", "Had"],
+    answer: "Are",
+    pemb: `
+      <div style="margin-bottom:12px"><span class="ans-pill">&#10003; Jawaban Benar: <strong>Are</strong></span></div>
+      <p><strong>Konsep: There + Compound Subject (And) → Plural</strong></p><br>
+      <p>Dalam konstruksi <strong>"There + be"</strong>, kata kerja disesuaikan dengan subjek yang mengikutinya. Subjek di sini adalah: <strong>"a dog, a cat, and a bird"</strong> — tiga benda berbeda yang dihubungkan oleh "and".</p><br>
+      <p>Tiga subjek yang dihubungkan "and" = <strong>compound subject (plural)</strong>. Plural → <strong>"Are"</strong>.</p><br>
+      <p>Catatan: Dalam percakapan informal, "There is a dog, a cat, and a bird" juga kadang digunakan (proximity ke subjek pertama yang singular), tetapi secara gramatikal formal, jawaban yang benar adalah <strong>"Are"</strong>.</p><br>
+      <p>&#10003; <em>There <strong>are</strong> a dog, a cat, and a bird in the cage.</em></p>
+    `
+  },
+  {
+    id: 17,
+    raw: "Here into the main ring of the circus ___ the trained elephants.",
+    opts: ["Came", "Coming", "Comes", "Come", "Comer"],
+    answer: "Come",
+    pemb: `
+      <div style="margin-bottom:12px"><span class="ans-pill">&#10003; Jawaban Benar: <strong>Come</strong></span></div>
+      <p><strong>Konsep: Inverted Sentence (Here) + Plural Subject</strong></p><br>
+      <p>Kalimat ini menggunakan pola inversi: <em>"Here + frasa preposisional + verb + subject"</em>. Subjek sebenarnya bukan "here" atau "circus", melainkan <strong>"the trained elephants"</strong> (plural).</p><br>
+      <p>Kalimat ini menggambarkan aksi yang terjadi (sirkus) → <strong>Simple Present Tense</strong>. Plural + Simple Present → tanpa -s/es → <strong>"Come"</strong>.</p><br>
+      <p>"Came" = Simple Past; "Coming" butuh auxiliary; "Comes" = singular; "Comer" bukan kata yang valid dalam bahasa Inggris.</p><br>
+      <p>&#10003; <em>Here into the main ring of the circus <strong>come</strong> the trained elephants.</em></p>
+    `
+  },
+  {
+    id: 18,
+    raw: "Either the workers or the boss ___ the merchandise.",
+    opts: ["Deliver", "Delivers", "Delivering", "Delivered", "Are delivering"],
+    answer: "Delivers",
+    pemb: `
+      <div style="margin-bottom:12px"><span class="ans-pill">&#10003; Jawaban Benar: <strong>Delivers</strong></span></div>
+      <p><strong>Konsep: Either...Or Rule — Nearest Subject Singular</strong></p><br>
+      <p>Dengan konjungsi <strong>"Either...or"</strong>, kata kerja disesuaikan dengan subjek yang paling dekat (Proximity Rule).</p><br>
+      <p>Subjek: <em>"the workers"</em> (plural) <strong>or</strong> <em>"the boss"</em> (singular). Subjek yang paling dekat adalah <strong>"the boss"</strong> (singular). Simple Present singular → kata kerja + s/es → <strong>"Delivers"</strong>.</p><br>
+      <p>Rumus: A or B → verba sesuai B. &nbsp; B = "the boss" (singular) → <strong>Delivers</strong>.</p><br>
+      <p>&#10003; <em>Either the workers or the boss <strong>delivers</strong> the merchandise.</em></p>
+    `
+  },
+  {
+    id: 19,
+    raw: "The committee ___ hard for better schools.",
+    opts: ["Have work", "Has Works", "Works", "Work", "Worked"],
+    answer: "Works",
+    pemb: `
+      <div style="margin-bottom:12px"><span class="ans-pill">&#10003; Jawaban Benar: <strong>Works</strong></span></div>
+      <p><strong>Konsep: Collective Noun → Singular</strong></p><br>
+      <p><strong>"The committee"</strong> adalah <em>collective noun</em> → diperlakukan sebagai <strong>singular</strong> (bertindak sebagai satu unit yang berjuang bersama).</p><br>
+      <p>Kalimat menyatakan fakta/kebiasaan → <strong>Simple Present Tense</strong>. Singular → kata kerja + s/es → <strong>"Works"</strong>.</p><br>
+      <p>Analisis opsi lain:<br>
+      &nbsp; "Have work" = tidak gramatikal (have + noun tanpa verb form)<br>
+      &nbsp; "Has Works" = tidak gramatikal (capitalization + struktur salah)<br>
+      &nbsp; "Work" = verba plural (tidak sesuai singular)<br>
+      &nbsp; "Worked" = Simple Past (tidak sesuai konteks)</p><br>
+      <p>&#10003; <em>The committee <strong>works</strong> hard for better schools.</em></p>
+    `
+  },
+  {
+    id: 20,
+    raw: "The center on the basketball team ___ the ball too high.",
+    opts: ["Bounce", "Bounces", "Bounced", "Have bounce", "Has bounce"],
+    answer: "Bounces",
+    pemb: `
+      <div style="margin-bottom:12px"><span class="ans-pill">&#10003; Jawaban Benar: <strong>Bounces</strong></span></div>
+      <p><strong>Konsep: Prepositional Phrase tidak Mengubah Subjek</strong></p><br>
+      <p>Subjek utama kalimat ini adalah <strong>"The center"</strong> (singular — merujuk pada satu pemain posisi center). Frasa <strong>"on the basketball team"</strong> adalah frasa preposisional yang menerangkan "the center" — bukan bagian dari subjek.</p><br>
+      <p>Kalimat menggambarkan kebiasaan → <strong>Simple Present Tense</strong>. Singular + Simple Present → kata kerja + s/es → <strong>"Bounces"</strong>.</p><br>
+      <p>Catatan: Soal asli menyebut "to high" yang seharusnya <em>"too high"</em> (terlalu tinggi). "Have bounce / Has bounce" bukan konstruksi gramatikal yang benar.</p><br>
+      <p>&#10003; <em>The center on the basketball team <strong>bounces</strong> the ball too high.</em></p>
+    `
+  }
+];
+
+/* ─── STATE ─── */
+const LETTERS   = ['A','B','C','D','E'];
+let studentName = '';
+let curQ        = 0;
+let userAnswers = new Array(QUESTIONS.length).fill(null);
+let isAnswered  = new Array(QUESTIONS.length).fill(false);
+
+/* ─── LOGIN ─── */
+function startQuiz() {
+  const raw = document.getElementById('sname').value.trim();
+  if (!raw) {
+    const inp = document.getElementById('sname');
+    inp.style.borderColor = 'rgba(180,50,50,0.5)';
+    inp.focus();
+    setTimeout(() => inp.style.borderColor = '', 900);
+    return;
+  }
+  studentName = raw;
+  document.getElementById('hdr-avatar').textContent = raw[0].toUpperCase();
+  document.getElementById('hdr-sname').textContent  = raw;
+  document.getElementById('login-page').style.display = 'none';
+  document.getElementById('quiz-page').style.display  = 'block';
+  buildNav();
+  renderQ(0);
+}
+document.getElementById('sname').addEventListener('keydown', e => {
+  if (e.key === 'Enter') startQuiz();
+});
+
+/* ─── NAV ─── */
+function buildNav() {
+  const grid = document.getElementById('nav-grid');
+  grid.innerHTML = '';
+  QUESTIONS.forEach((_, i) => {
+    const b = document.createElement('button');
+    b.className = 'nbtn';
+    b.id = `nb${i}`;
+    b.textContent = i + 1;
+    b.onclick = () => renderQ(i);
+    grid.appendChild(b);
+  });
+  syncNav();
+}
+
+function syncNav() {
+  QUESTIONS.forEach((q, i) => {
+    const b = document.getElementById(`nb${i}`);
+    if (!b) return;
+    b.className = 'nbtn';
+    if (i === curQ) { b.classList.add('active'); return; }
+    if (isAnswered[i]) {
+      b.classList.add(userAnswers[i] === q.answer ? 'n-correct' : 'n-wrong');
+    }
+  });
+  const done = isAnswered.filter(Boolean).length;
+  document.getElementById('hdr-prog').textContent = `${done} / ${QUESTIONS.length}`;
+  document.getElementById('hdr-fill').style.width  = `${(done / QUESTIONS.length) * 100}%`;
+}
+
+/* ─── RENDER QUESTION ─── */
+function renderQ(idx) {
+  curQ = idx;
+  const q    = QUESTIONS[idx];
+  const done = isAnswered[idx];
+  const uAns = userAnswers[idx];
+  const card = document.getElementById('q-card');
+
+  const qHTML = q.raw.replace('___', '<span class="q-blank"></span>');
+
+  const optsHTML = q.opts.map((opt, oi) => {
+    let cls = '', icon = '';
+    if (done) {
+      if (opt === q.answer)                      { cls = 'opt-show-correct'; icon = '<span class="opt-icon">&#10003;</span>'; }
+      else if (opt === uAns && uAns !== q.answer){ cls = 'opt-wrong';       icon = '<span class="opt-icon">&#10007;</span>'; }
+      if (opt === uAns && uAns === q.answer)     { cls = 'opt-correct'; }
+    }
+    const safeOpt = opt.replace(/'/g,"&#39;").replace(/"/g,'&quot;');
+    return `<button class="opt-btn ${cls}" onclick="selectAns(${idx},'${safeOpt}')" ${done ? 'disabled' : ''}>
+      <span class="opt-letter">${LETTERS[oi]}</span>
+      <span>${opt}</span>
+      ${icon}
+    </button>`;
+  }).join('');
+
+  const pembHTML = done ? `
+    <div class="pembahasan">
+      <div class="pemb-head">
+        <div class="pemb-icon-box">&#128218;</div>
+        <div class="pemb-title">Pembahasan Lengkap</div>
+      </div>
+      <div class="pemb-body">${q.pemb}</div>
+    </div>` : '';
+
+  const prevBtn = idx > 0
+    ? `<button class="foot-btn btn-prev" onclick="renderQ(${idx-1})">&larr; Sebelumnya</button>`
+    : `<span></span>`;
+
+  const nextBtn = idx < QUESTIONS.length - 1
+    ? `<button class="foot-btn btn-next" onclick="renderQ(${idx+1})">Berikutnya &rarr;</button>`
+    : `<button class="foot-btn btn-finish" onclick="showResult()">Selesai &amp; Lihat Hasil &rarr;</button>`;
+
+  card.innerHTML = `
+    <div class="q-tag">
+      <div class="q-tag-num">${idx+1}</div>
+      <div class="q-tag-lbl">Soal <span class="hi">${idx+1}</span> dari ${QUESTIONS.length}</div>
+    </div>
+    <p class="q-text">${qHTML}</p>
+    <div class="options-list">${optsHTML}</div>
+    ${pembHTML}
+    <div class="card-foot">${prevBtn}${nextBtn}</div>
+  `;
+  syncNav();
+  card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+/* ─── SELECT ANSWER ─── */
+function selectAns(qIdx, ans) {
+  if (isAnswered[qIdx]) return;
+  userAnswers[qIdx] = ans;
+  isAnswered[qIdx]  = true;
+  renderQ(qIdx);
+}
+
+/* ─── RESULT ─── */
+function showResult() {
+  const unanswered = isAnswered.filter(v => !v).length;
+  if (unanswered > 0) {
+    if (!confirm(`Masih ada ${unanswered} soal yang belum dijawab. Lanjutkan ke hasil?`)) return;
+  }
+  document.getElementById('quiz-page').style.display   = 'none';
+  document.getElementById('result-page').style.display = 'block';
+
+  const correct = QUESTIONS.filter((q, i) => userAnswers[i] === q.answer).length;
+  const wrong   = QUESTIONS.length - correct;
+  const pct     = Math.round((correct / QUESTIONS.length) * 100);
+
+  document.getElementById('r-score').textContent   = correct;
+  document.getElementById('r-correct').textContent = correct;
+  document.getElementById('r-wrong').textContent   = wrong;
+  document.getElementById('r-sub').textContent     = `Evaluasi Paket 2 · ${studentName}`;
+
+  let trophy = '&#127942;', title = 'Luar Biasa!', grade = '';
+  if (pct === 100)      { trophy='&#127942;'; title='Sempurna!';              grade='Nilai A+ — Penguasaan penuh! Luar biasa!'; }
+  else if (pct >= 85)   { trophy='&#129351;'; title='Hasil Sangat Baik!';     grade='Nilai A — Pertahankan terus prestasimu!'; }
+  else if (pct >= 70)   { trophy='&#129352;'; title='Cukup Baik!';            grade='Nilai B — Terus berlatih, kamu hampir menguasainya!'; }
+  else if (pct >= 55)   { trophy='&#129353;'; title='Perlu Lebih Banyak Latihan!'; grade='Nilai C — Pelajari kembali materi SVA ya!'; }
+  else                  { trophy='&#128218;'; title='Semangat Belajar!';      grade='Nilai D — Jangan menyerah, ulangi evaluasi ini!'; }
+
+  document.getElementById('r-trophy').innerHTML   = trophy;
+  document.getElementById('r-title').textContent  = title;
+  document.getElementById('r-grade').textContent  = grade;
+
+  const rev = document.getElementById('r-review');
+  rev.innerHTML = QUESTIONS.map((q, i) => {
+    const ok   = userAnswers[i] === q.answer;
+    const uAns = userAnswers[i] || '(tidak dijawab)';
+    return `<div class="rev-item">
+      <div class="rev-ico ${ok ? 'ri-c' : 'ri-w'}">${ok ? '&#10003;' : '&#10007;'}</div>
+      <div class="rev-body">
+        <div class="rev-qtxt">Soal ${i+1}</div>
+        <div class="rev-ans">
+          ${!ok ? `<span class="ra-yours">Kamu: ${uAns}</span> <span style="color:rgba(255,255,255,0.2)">·</span>` : ''}
+          <span class="ra-correct">&#10003; Benar: ${q.answer}</span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ─── RESTART ─── */
+function restartQuiz() {
+  userAnswers = new Array(QUESTIONS.length).fill(null);
+  isAnswered  = new Array(QUESTIONS.length).fill(false);
+  curQ = 0;
+  document.getElementById('result-page').style.display = 'none';
+  document.getElementById('login-page').style.display  = 'flex';
+  document.getElementById('sname').value = '';
+}
+</script>
+</body>
+</html>
